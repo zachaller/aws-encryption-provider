@@ -1,5 +1,5 @@
 /*
-Copyright 2018 The Kubernetes Authors.
+Copyright 2020 The Kubernetes Authors.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -26,10 +26,11 @@ type AWSKMS struct {
 	kmsiface.KMSAPI
 }
 
-func New(region string) (*AWSKMS, error) {
+func New(region, kmsEndpoint string) (*AWSKMS, error) {
 	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String(region),
+		Region:                        aws.String(region),
 		CredentialsChainVerboseErrors: aws.Bool(true),
+		Endpoint:                      aws.String(kmsEndpoint),
 	})
 
 	if err != nil {

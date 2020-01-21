@@ -9,7 +9,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM golang:1.12-alpine AS build
+FROM golang:1.13-alpine AS build
 RUN apk --no-cache update && \
     apk --no-cache add ca-certificates git && \
     rm -rf /var/cache/apk/*
@@ -17,11 +17,11 @@ WORKDIR /go/src/sigs.k8s.io/aws-encryption-provider
 ARG TAG
 COPY . ./
 ENV GO111MODULE=on
-RUN	CGO_ENABLED=0 GOOS=linux go build -installsuffix cgo -ldflags \
-    "-X sigs.k8s.io/aws-encryption-provider/pkg/version.Version=$TAG" \
+RUN	CGO_ENABLED=0 GOOS=linux go build -mod vendor -ldflags \
+    "-w -s -X sigs.k8s.io/aws-encryption-provider/pkg/version.Version=$TAG" \
     -o bin/aws-encryption-provider cmd/server/main.go
 
-FROM scratch AS aws-encryption-provider
+FROM busybox AS aws-encryption-provider
 COPY --from=build /etc/ssl/certs/ /etc/ssl/certs/
 COPY --from=build /go/src/sigs.k8s.io/aws-encryption-provider/bin/aws-encryption-provider /aws-encryption-provider
 ENTRYPOINT ["/aws-encryption-provider"]
